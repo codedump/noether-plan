@@ -20,12 +20,12 @@ class Balls:
                   random.randint(-500, 500)]])
 
     # ball size(s)
-    rad = [random.randint(15, 35)]
+    rad = array([random.randint(15, 35)])
 
     # ball colors
-    rgb = [(128, 0, 0)]
+    rgb = array([(128, 0, 0)])
 
-    
+
 class GameData:
     '''
     Main structure to hold of the game's internal data.
@@ -41,7 +41,33 @@ class GameData:
     # balls collection
     balls = Balls()
 
-        
+
+#
+# simple version: draw a single ball (index `i`)
+# and update position of only a single ball
+# (the one at index `i`)
+#
+def draw_ball_single(balls, screen, i=0):
+    pygame.draw.circle(screen,
+                       balls.rgb[i],
+                       (balls.pos[i][0], balls.pos[i][1]),
+                       balls.rad[i])
+
+def move_ball_single(balls, t, bbox, i=0):
+    balls.pos[i] += (balls.vel[i]*t).astype(int)
+    
+    if ((balls.pos[i,0]-balls.rad) <= bbox[0]) or ((balls.pos[i,0]+balls.rad) >= bbox[2]):
+        balls.vel[i][0] *= -1
+
+    if ((balls.pos[i,1]-balls.rad) <= bbox[1]) or ((balls.pos[i,1]+balls.rad) >= bbox[3]):
+        balls.vel[i][1] *= -1
+
+
+#
+# performance version: handle multiple balls (all of them)
+# use numpy array() to do calculations on all balls at
+# the same time
+#
 def move_balls(balls, t, bbox):
     '''
     Advances balls each one time step ahead.
@@ -57,20 +83,20 @@ def move_balls(balls, t, bbox):
     
     balls.pos += (balls.vel*t).astype(int)
 
-    lr = ((balls.pos[:,0]-balls.rad) <= bbox[0]) or ((balls.pos[:,0]+balls.rad) >= bbox[2])
-    tb = ((balls.pos[:,1]-balls.rad) <= bbox[1]) or ((balls.pos[:,1]+balls.rad) >= bbox[3])
-
-    balls.vel[lr,0] *= -1
-    balls.vel[tb,1] *= -1
+    for coord_index in range(2):
+        out_of_bounds = \
+            ((balls.pos[:,coord_index]-balls.rad) <= bbox[coord_index]) or \
+            ((balls.pos[:,coord_index]+balls.rad) >= bbox[coord_index+2])
+        balls.vel[out_of_bounds,coord_index] *= -1
 
 
 def draw_balls(balls, screen):
     '''
     Puts all balls on the screen.
     '''
-    for p,v,r,c in zip(balls.pos, balls.vel, balls.rad, balls.rgb):
-        pygame.draw.circle(screen, c, (p[0], p[1]), r)
-    
+    for pos,rad,col in zip(balls.pos, balls.rad, balls.rgb):
+        pygame.draw.circle(screen, col, (pos[0], pos[1]), rad)
+
     
 def handle_events(g):
     '''
@@ -107,8 +133,8 @@ def run_pygame():
              
         handle_events(game)
         
-        move_balls(game.balls, game.period, (0, 0, size[0], size[1]))
-        draw_balls(game.balls, screen)
+        move_ball_single(game.balls, game.period, (0, 0, size[0], size[1]))
+        draw_ball_single(game.balls, screen)
     
         pygame.display.flip()
         clock.tick(1.0/game.period)
