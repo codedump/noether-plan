@@ -37,7 +37,7 @@
 ### Flow design
 After initialization, the application repeatedly runs one single loop:
 ```mermaid
-flowchart MainLoop
+flowchart TD
 A[Handle incoming user input] --> B[Update ball position]
 B --> C[Display ball]
 C --> D[Wait for period]
