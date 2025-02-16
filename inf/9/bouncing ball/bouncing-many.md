@@ -38,14 +38,9 @@
 After initialization, the application repeatedly runs one single loop:
 ```mermaid
 flowchart MainLoop
-A[Handle incoming user input]
-B[Update ball position]
-C[Display ball]
-D[Wait for period]
-A --> B
-B --> C
-C --> D
-D --> A
+A[Handle incoming user input] --> B[Update ball position]
+B --> C[Display ball]
+C --> D[Wait for period]
 ```
   
 ## Project management considerations
