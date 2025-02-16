@@ -24,7 +24,7 @@
 ### Data design
 - One `GameData` structure (object) for generic game data
   (timing, runtime data)
-  ```plantuml
+  ```
   @startuml
   object GameData
   GameData:running=True
@@ -38,7 +38,7 @@
   - `vel`: velocity (Vx, Vy), in pixels/second
   - `rad`: "size" of the ball, i.e. radius
   - `rgb`: color of the ball as RGB tuple
-  ```plantuml
+  ```
   @startuml
   object Ball
   Ball:pos=(x, y)
