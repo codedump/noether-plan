@@ -25,8 +25,8 @@
 - One `GameData` structure (object) for generic game data
   (timing, runtime data)
   ```mermaid
-  classDiagam
-  class GameData{
+  classDiagram
+  class GameData {
     running
     period
     ball
@@ -40,13 +40,14 @@
   - `vel`: velocity (Vx, Vy), in pixels/second
   - `rad`: "size" of the ball, i.e. radius
   - `rgb`: color of the ball as RGB tuple
-  ```
-  @startuml
-  object Ball
-  Ball:pos=(x, y)
-  Ball:vel=(Vx, Vy)
-  Ball:rad=42
-  Ball:rgb=[128, 0, 0]
+  ```mermaid
+  classDiagram
+  class Ball {
+    pos
+    vel
+    rad
+    rgb
+  }
   ```
 
 - Use `array()` as basic structure wherever similar data
