@@ -24,15 +24,13 @@
 ### Data design
 - One `GameData` structure (object) for generic game data
   (timing, runtime data)
-  ![](game-data.svg)
-  <div hidden>
-  ```
-  @startuml game-data
-  object GameData
-  GameData:running=True
-  GameData:period=1/60
-  GameData:ball=Ball()
-  @enduml
+  ```mermaid
+  classDiagam
+  class GameData{
+    running
+    period
+    ball
+  }
   ```
   </div>
 
