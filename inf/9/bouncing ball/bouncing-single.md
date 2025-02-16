@@ -24,14 +24,17 @@
 ### Data design
 - One `GameData` structure (object) for generic game data
   (timing, runtime data)
+  ![](game-data.svg)
+  <div hidden>
   ```
-  @startuml
+  @startuml game-data
   object GameData
   GameData:running=True
   GameData:period=1/60
   GameData:ball=Ball()
   @enduml
   ```
+  </div>
 
 - Keep ball state in a specific structure `Ball`; necesssary
   fields:
