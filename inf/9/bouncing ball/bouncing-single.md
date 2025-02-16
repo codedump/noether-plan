@@ -30,6 +30,7 @@
   GameData:running=True
   GameData:period=1/60
   GameData:ball=Ball()
+  @enduml
   ```
 
 - Keep ball state in a specific structure `Ball`; necesssary
