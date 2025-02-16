@@ -8,15 +8,14 @@ import pygame
 from numpy import array
     
 
-class Balls:
+class Ball:
     # several balls will be bouncing around the screen.
-    # we start with 1, but we prepare for having a large
-    # number.
+    # we start with 1 ball in this version
     
-    # balls current position (pixels)
+    # ball current position (pixels)
     pos = array([random.randint(300, 700), random.randint(300, 700)])
 
-    # balls velocities in pixels/sec
+    # ball velocities in pixels/sec
     vel = array([random.randint(-500, 500), random.randint(-500, 500)])
 
     # ball size(s)
@@ -39,7 +38,7 @@ class GameData:
     period = 1.0/60.0
 
     # balls collection
-    balls = Balls()
+    ball = Ball()
 
 
 #
@@ -47,21 +46,21 @@ class GameData:
 # and update position of only a single ball
 # (the one at index `i`)
 #
-def draw_ball_single(balls, screen):
+def draw_ball_single(ball, screen):
     pygame.draw.circle(screen,
-                       balls.rgb,
-                       (balls.pos[0], balls.pos[1]),
-                       balls.rad)
+                       ball.rgb,
+                       (ball.pos[0], ball.pos[1]),
+                       ball.rad)
 
 
-def move_ball_single(balls, t, bbox):
-    balls.pos += (balls.vel*t).astype(int)
+def move_ball_single(ball, t, bbox):
+    ball.pos += (ball.vel*t).astype(int)
     
-    if ((balls.pos[0]-balls.rad) <= bbox[0]) or ((balls.pos[0]+balls.rad) >= bbox[2]):
-        balls.vel[0] *= -1
+    if ((ball.pos[0]-ball.rad) <= bbox[0]) or ((ball.pos[0]+ball.rad) >= bbox[2]):
+        ball.vel[0] *= -1
 
-    if ((balls.pos[1]-balls.rad) <= bbox[1]) or ((balls.pos[1]+balls.rad) >= bbox[3]):
-        balls.vel[1] *= -1
+    if ((ball.pos[1]-ball.rad) <= bbox[1]) or ((ball.pos[1]+ball.rad) >= bbox[3]):
+        ball.vel[1] *= -1
 
     # ACHTUNG: the upper two lines are very repetitive -- we
     # essentially write the same code for every direcion (vertical
@@ -108,8 +107,8 @@ def run_pygame():
              
         handle_events(game)
         
-        move_ball_single(game.balls, game.period, (0, 0, size[0], size[1]))
-        draw_ball_single(game.balls, screen)
+        move_ball_single(game.ball, game.period, (0, 0, size[0], size[1]))
+        draw_ball_single(game.ball, screen)
     
         pygame.display.flip()
         clock.tick(1.0/game.period)

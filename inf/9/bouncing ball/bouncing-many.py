@@ -40,7 +40,7 @@ class Balls:
     rad = array([random.randint(15, 35)])
 
     # ball colors
-    rgb = array([(128, 0, 0)])
+    rgb = array([[128, 0, 0]])
 
 
 class GameData:
