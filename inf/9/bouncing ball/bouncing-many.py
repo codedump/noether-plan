@@ -1,15 +1,32 @@
 #!/usr/bin/python3
 
 import random
+import pygame
+
 from numpy import array
 
-import pygame
+# We need more array()-based operations: glueing arrays
+# together ("concatenate") and calculating random numbers
+# in arrays, all at once.
+from numpy import concatenate
+from numpy.random import rand as random_array
     
 
 class Balls:
     # several balls will be bouncing around the screen.
     # we start with 1, but we prepare for having a large
     # number.
+
+    #
+    # Because we want to move many balls at once, each
+    # information (position, velocity, radii, colors)
+    # now need an extra dimention upfront.
+    # Here, too, we are using array().
+    #
+    # We only initialize the game data with one single ball.
+    # But below we define add_balls(), which can add a large
+    # number of random balls to these data.
+    #
     
     # balls current position (pixels)
     pos = array([[random.randint(300, 700),
@@ -43,27 +60,6 @@ class GameData:
 
 
 #
-# simple version: draw a single ball (index `i`)
-# and update position of only a single ball
-# (the one at index `i`)
-#
-def draw_ball_single(balls, screen, i=0):
-    pygame.draw.circle(screen,
-                       balls.rgb[i],
-                       (balls.pos[i][0], balls.pos[i][1]),
-                       balls.rad[i])
-
-def move_ball_single(balls, t, bbox, i=0):
-    balls.pos[i] += (balls.vel[i]*t).astype(int)
-    
-    if ((balls.pos[i,0]-balls.rad) <= bbox[0]) or ((balls.pos[i,0]+balls.rad) >= bbox[2]):
-        balls.vel[i][0] *= -1
-
-    if ((balls.pos[i,1]-balls.rad) <= bbox[1]) or ((balls.pos[i,1]+balls.rad) >= bbox[3]):
-        balls.vel[i][1] *= -1
-
-
-#
 # performance version: handle multiple balls (all of them)
 # use numpy array() to do calculations on all balls at
 # the same time
@@ -85,7 +81,7 @@ def move_balls(balls, t, bbox):
 
     for coord_index in range(2):
         out_of_bounds = \
-            ((balls.pos[:,coord_index]-balls.rad) <= bbox[coord_index]) or \
+            ((balls.pos[:,coord_index]-balls.rad) <= bbox[coord_index]) + \
             ((balls.pos[:,coord_index]+balls.rad) >= bbox[coord_index+2])
         balls.vel[out_of_bounds,coord_index] *= -1
 
@@ -97,7 +93,40 @@ def draw_balls(balls, screen):
     for pos,rad,col in zip(balls.pos, balls.rad, balls.rgb):
         pygame.draw.circle(screen, col, (pos[0], pos[1]), rad)
 
+
+def add_balls(balls, bbox=None, num=1):
+    '''
+    Creates more balls, adding them to the game data.
+    Ball data (positions, coordinates, colors, velocities)
+    are all random.
+
+    Args:
+        balls: the game's `Balls` structure
+        bbox: bounding box within which to initialize
+          the balls positions; if not specified, we default
+          to a hard-coded rectangle.
+        num: number of balls to add
+    '''
+
+    if bbox is None:
+        bbox = (300, 300, 700, 700)
+
+    upper_left  = array([bbox[0], bbox[1]])
+    lower_right = array([bbox[2], bbox[3]])
+
+    box_size = lower_right - upper_left
     
+    new_pos = (upper_left + random_array(num, 2) * box_size).astype(int)
+    new_vel = (      -500 + random_array(num, 2) * 1000).astype(int)
+    new_rgb = (             random_array(num, 3) * 255).astype(int)
+    new_rad = (        10 + random_array(num)    * 25).astype(int)
+    
+    balls.pos = concatenate((balls.pos, new_pos))
+    balls.vel = concatenate((balls.vel, new_vel))
+    balls.rgb = concatenate((balls.rgb, new_rgb))
+    balls.rad = concatenate((balls.rad, new_rad))
+
+
 def handle_events(g):
     '''
     Extracts events from the pygame event queue and updates
@@ -126,6 +155,8 @@ def run_pygame():
     # Display size in pixels
     size = (1280, 720)
     screen = pygame.display.set_mode(size)
+
+    add_balls(game.balls, bbox=(50, 50, size[0]-50, size[1]-50), num=100)
     
     while game.running:
 
@@ -133,8 +164,8 @@ def run_pygame():
              
         handle_events(game)
         
-        move_ball_single(game.balls, game.period, (0, 0, size[0], size[1]))
-        draw_ball_single(game.balls, screen)
+        move_balls(game.balls, game.period, (0, 0, size[0], size[1]))
+        draw_balls(game.balls, screen)
     
         pygame.display.flip()
         clock.tick(1.0/game.period)
