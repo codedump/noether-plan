@@ -36,10 +36,16 @@
 
 ### Flow design
 After initialization, the application repeatedly runs one single loop:
-```plantuml
-:Handle incoming user input (events)
-:Update ball position
-:Display ball
+```mermaid
+flowchart MainLoop
+A[Handle incoming user input]
+B[Update ball position]
+C[Display ball]
+D[Wait for period]
+A --> B
+B --> C
+C --> D
+D --> A
 ```
   
 ## Project management considerations

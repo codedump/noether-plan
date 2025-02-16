@@ -32,7 +32,6 @@
     ball
   }
   ```
-  </div>
 
 - Keep ball state in a specific structure `Ball`; necesssary
   fields:
