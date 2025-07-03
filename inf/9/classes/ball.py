@@ -9,8 +9,8 @@ class Coordinate:
     '''
 
     def __init__(self, x=None, y=None):
-        self.x = x if x is not None else random.randint(256)
-        self.y = y if y is not None else random.randint(256)
+        self.x = x if x is not None else random.randint(0, 256)
+        self.y = y if y is not None else random.randint(0, 256)
 
 
     def __add__(self, other):
@@ -42,6 +42,10 @@ class Coordinate:
         return self
 
 
+    def __repr__(self):
+        return f'{self.x}/{self.y}'
+
+
 class Crossing(enum.IntEnum):
     '''
     Formalize crossing of boundaries
@@ -64,18 +68,16 @@ class BoundingBox:
     bottom = 0
     right = 0
 
-    def __init__(self, top=None, left=None, bottom=None, right=None
+    def __init__(self, top=None, left=None, bottom=None, right=None,
                  center=None, size=None):
         if center is not None:
             if size is None:
                 raise RuntimeError(
-                    "user either top/left/bottom/right, '
-                    'or center/size"
-                )
+                    "user either top/left/bottom/right, or center/size")
             self.top    = center.y-size.y/2
             self.bottom = center.y+size.y/2
             self.left   = center.x-size.x/2
-            self.right  = center.x-size.x/2
+            self.right  = center.x+size.x/2
         else:
             for margin in ("top", "left", "bottom", "right"):
                 if locals()[margin] is None:
@@ -116,6 +118,11 @@ class BoundingBox:
         '''
         return len(self.crosses(thing)) == 0
 
+
+
+    def __repr__(self):
+        return f'{self.top}/{self.left}+{self.bottom}/{self.right}'
+
             
 class Shape:
     '''
@@ -153,6 +160,9 @@ class Shape:
     def advance(self, time_delta):
         self.moveby(self._vel * time_delta)
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self._bbox})'
+
 
 class Artist:
     '''
@@ -164,6 +174,26 @@ class Artist:
 
     This is an abstract base class to demonstrate the API only.
     '''
+
+    def get_canvas_size(self):
+        '''
+        Returns a `Coordinate` with the maximum size of the canvas.
+        '''
+        raise RuntimeError('not implemented')
+
+    def begin(self):
+        '''
+        Call at the beginning of a drawing session.
+        '''
+        raise RuntimeError('not implemented')
+
+    
+    def end(self):
+        '''
+        Call at the end of a drawing session.
+        '''
+        raise RuntimeError('not implemented')
+    
 
     def set_color(self, r, g, b):
         '''
@@ -198,9 +228,11 @@ class Ball(Shape):
             radius: ...yep. It's the radius.
             color: an (R, G, B) tuple
         '''
-        super().__init__()
-        self._bbox = BoundingBox(center=center, size=Coordinate(radius*2, radius*2))
-        self._color = color if color is not None else (r, g, b)
+        super().__init__(
+            bbox=BoundingBox(center=center, size=Coordinate(radius*2, radius*2)),
+            color=color if color is not None else (r, g, b),
+            velocity=Coordinate(random.randint(0,30), random.randint(0,30))
+        )
 
 
     def draw(self, artist):
@@ -214,3 +246,29 @@ class Ball(Shape):
         radius = (self._bbox.right - self._bbox.left)/2
 
         artist.draw_circle(center, radius)
+
+
+class Scene:
+    '''
+    Holds together the happening (i.e. a multitude of "Shapes" in a box).
+    '''
+    def __init__(self):
+        self._shapes = []
+
+        
+    def add(self, one_or_many):
+        '''
+        Adds either a single shape, or a list of shapes, to the scene.
+        '''
+        if hasattr(one_or_many, "__getitem__"):
+            self._shapes += list(one_or_many)
+        else:
+            self._shapes.append(one_or_many)
+
+
+    def display(self, artist):
+        '''
+        Displays the current state of the scene using the specified artist.
+        '''
+        for s in self._shapes:
+            s.draw(artist)
